@@ -32,6 +32,22 @@ const MapEventsHandler: React.FC<{ onMoveEnd: (center: { lat: number; lng: numbe
  return null;
 };
 
+const MapSizeInvalidator: React.FC = () => {
+  const map = useLeafletMap();
+
+  useEffect(() => {
+    // Utilizamos setTimeout para asegurar que el contenedor ha finalizado su renderizado
+    // y ha tomado sus dimensiones CSS finales (h-screen, w-full, etc.)
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 100); 
+
+    return () => clearTimeout(timer); // Limpieza
+  }, [map]);
+
+  return null;
+};
+
 // --- MAIN COMPONENT ---
 
 interface MapViewerProps {
@@ -129,6 +145,17 @@ const MapViewer: React.FC<MapViewerProps> = ({
       <TileLayer url={getTileUrl()} attribution="&copy; Contributors" />
       <ZoomControl position="bottomright" />
       {/* } <MapUpdater center={mapCenter} zoom={mapZoom} />*/}
+
+     <MapSizeInvalidator /> 
+
+ {(showDistricts || activeElectionData) && districtsData && (
+ <GeoJSON 
+ key={geoJsonKey} 
+ data={districtsData} 
+ style={geoJsonStyle}
+ onEachFeature={onEachFeature}
+ />
+ )}
 
       // SINGLE GEOJSON LAYER: showDistricts comes from Context 
       {(showDistricts || activeElectionData) && districtsData && (
